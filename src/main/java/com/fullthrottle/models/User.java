@@ -49,8 +49,7 @@ public class User implements UserDetails{
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Task> tasks = new ArrayList<>();
 
-    // Метод для хеширования пароля
-    //@JsonProperty
+
     public void setPassword(String password) {
         //BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
         //this.password = encoder.encode(password);
