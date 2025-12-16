@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fullthrottle_db
+
+    # настройки постгрес
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: fullthrottle
+    ports:
+      - "5432:5432"
+    # Сохраняет данные БД при перезапуске
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    #networks:
+    #  - fullthrottle_network
+    # готовность БД
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d fullthrottle"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: DockerfileAPP
+    container_name: fullthrottle_app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/fullthrottle
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
+    networks:
+      - fullthrottle_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+ # сеть для связи контейнеров (для изоляции)
+networks:
+  fullthrottle_network:
